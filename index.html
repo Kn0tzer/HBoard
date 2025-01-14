@@ -7,6 +7,7 @@
     <meta name="apple-mobile-web-app-title" content="HBoard"/>
     <meta name="application-name" content="HBoard"/>
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes"> <!-- not deprecated idk what chrome is talking about-->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="viewport" content="viewport-fit=cover, user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="apple-touch-icon" href="/hboard/image.png"/>
@@ -37,8 +38,8 @@
             background-image: url('https://9to5mac.com/wp-content/uploads/sites/6/2024/09/iPhone-16-and-16-Pro-wallpapers-3.jpg');
             background-size: cover;
             transform: scale(1);
-          /*display: none; /* if not added to homescreen */
-            display: flex; /* */
+            display: none; /* if not added to homescreen */
+          /*display: flex;*/
         }
         @media (max-width: 768px) { /* if width <=768px set fullscreen*/
             .phone {
@@ -49,7 +50,7 @@
 
 
         
-        /*.status-bar {
+         .status-bar {
             position: fixed;
             top: 0;
             left: 0;
@@ -73,7 +74,7 @@
             width: 17px;
             height: 17px;
             fill: #EEE;
-        }*/
+        }
 
 
 
@@ -205,7 +206,7 @@
         .instruction {
             text-align: center;
             padding: 20px;
-            display: none; /* */
+            /*display: none;  */
         }
         #content {
             width: 100%;
@@ -213,7 +214,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            display: none; /* */
+            /*display: none;  */
         }
     </style>
 </head>
@@ -255,7 +256,7 @@
 
 
             <div class="pages">
-                    <!-- Apps/pages created from js -->
+                <!-- Apps/pages created from js -->
             </div>
 
             <div class="page-dots">
@@ -294,12 +295,12 @@
 
 
     <script> // parse ?= stuff at end of url for app icons and names
-// Initialize or load app positions from localStorage
+// load or set app positions in localStorage
 function initializeAppPositions() {
   const appPositions = JSON.parse(localStorage.getItem('appPositions')) || {};
   const appData = JSON.parse(localStorage.getItem('appData')) || {};
   
-  // Initialize positions for any apps that don't have positions yet
+  // give all apps positions
   Object.keys(appData).forEach(appName => {
     if (!appPositions[appName]) {
       appPositions[appName] = findNextAvailablePosition(appPositions);
@@ -310,7 +311,6 @@ function initializeAppPositions() {
   return appPositions;
 }
 
-// Find the next available position number
 function findNextAvailablePosition(positions) {
   const occupiedPositions = new Set(Object.values(positions));
   let position = 1;
@@ -322,23 +322,20 @@ function findNextAvailablePosition(positions) {
   return position;
 }
 
-// Update a single app's position
+// Update one app's position
 function updateAppPosition(appName, newPosition) {
   const appPositions = JSON.parse(localStorage.getItem('appPositions')) || {};
   appPositions[appName] = newPosition;
   localStorage.setItem('appPositions', JSON.stringify(appPositions));
 }
 
-// Render all apps in their current positions
+// render apps in position (change this later)
 function renderApps() {
   const appData = JSON.parse(localStorage.getItem('appData')) || {};
   const appPositions = JSON.parse(localStorage.getItem('appPositions')) || {};
   const pagesContainer = document.querySelector('.home-screen .pages');
   
-  // Clear existing pages
-  pagesContainer.innerHTML = '';
-  
-  // Sort apps by position number
+  // Sort apps by position
   const apps = Object.entries(appData).map(([name, iconUrl]) => ({
     name,
     iconUrl,
@@ -347,7 +344,7 @@ function renderApps() {
 
   apps.sort((a, b) => a.position - b.position);
 
-  // Create pages and fill them with apps
+  // Create pages and fill with apps
   let currentPage = null;
   let currentPageNum = -1;
 
@@ -395,7 +392,7 @@ function createAppElement(appName, iconUrl) {
   return appContainer;
 }
 
-// Update the number of page dots
+// Update number of page dots
 function updatePageDots(pageCount) {
   const dotsContainer = document.querySelector('.page-dots-container');
   dotsContainer.innerHTML = '';
@@ -407,7 +404,7 @@ function updatePageDots(pageCount) {
   }
 }
 
-// Initialize on page load
+//  on page load
 const urlParams = new URLSearchParams(window.location.search);
 let appData = JSON.parse(localStorage.getItem('appData')) || {};
 
@@ -428,7 +425,8 @@ if (urlParams.toString()) {
     </script>
 
 
-    <script> // track mouse/touch movements for page scrolling
+    <script>
+        // track mouse/touch movements for page scrolling
         const slider = document.querySelector('.pages');
         const pages = document.querySelectorAll('.page');
         const pageWidth = slider.offsetWidth;
@@ -568,12 +566,6 @@ if (urlParams.toString()) {
                 }
             });
         }
-    </script>
-
-
-    <script>
-        // Get the app data from localStorage
-
     </script>
 </body>
 </html>

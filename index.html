@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBoard</title>
+    <meta name="apple-mobile-web-app-title" content="HBoard"/>
+    <meta name="application-name" content="HBoard"/>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="viewport-fit=cover, user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="apple-touch-icon" href="/hboard/image.png"/>
+    <link rel="icon" type="image/x-icon" href="/hboard/image.png">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #222;
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI"; /*mfw its illegal to use sf pro*/
+            color: white;
+            display: flex;
+            justify-content: center;
+            zoom: 1;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            touch-action: pan-x;
+            overflow-y: hidden;
+        }
+        .phone {
+            height: 100vh;
+            width: 48vh; /* force 19.5:9 aspect ratio*/
+            background-color: #222;
+            background-image: url('https://9to5mac.com/wp-content/uploads/sites/6/2024/09/iPhone-16-and-16-Pro-wallpapers-3.jpg');
+            background-size: cover;
+            transform: scale(1);
+          /*display: none; /* if not added to homescreen */
+            display: flex; /* */
+        }
+        @media (max-width: 768px) { /* if width <=768px set fullscreen*/
+            .phone {
+                height: 100vh;
+                width: 100vw;
+            }
+        }
+
+
+        
+        /*.status-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-left: 56px;
+            padding-right: 42px;
+        }
+        .time {
+            font-size: 17px;
+        }
+        .icons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .icon {
+            width: 17px;
+            height: 17px;
+            fill: #EEE;
+        }*/
+
+
+
+        .home-screen {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 42px;
+            height: calc(95%-30px);
+            width: 100%;
+        }
+        .pages {
+            position: absolute;
+            display: flex;
+            padding-top: 50px;
+            height: 75%;
+            overflow-x: scroll;
+            scroll-snap-type: x mandatory;
+            flex-direction: row;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            overscroll-behavior-x: contain;
+            touch-action: pan-x;
+            overflow-y: hidden;
+        }
+        .pages::-webkit-scrollbar {
+            display: none;
+        }
+        .page {
+            min-width: 100%;
+            max-width: 100%;
+            height: 100%;
+            bottom: 100%;
+            scroll-snap-align: start;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /*4 columns*/
+            grid-auto-rows: min-content;
+            padding-left: 25px; /* causes problems with mobile scrolling change this later */
+        }
+
+
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            width: 57px;
+            margin-bottom: 25px;
+        }
+        img {
+            width: 57px;
+            height: 57px;
+            border-radius: 14px;
+        }
+        .label {
+            margin-top: 4px;
+            font-size: 11px;
+            color: #EEE;
+            text-shadow: 0 5px 5px rgba(0, 0, 0, 0.7);
+            max-width: 80px;
+            text-align: center;
+            max-height: 15px;
+        }
+
+
+
+        .dock {
+            position: fixed;
+            justify-content: center;
+            margin-left: 18px;
+            margin-right: 15px;
+            width: 90%;
+            height: 85px;
+            bottom: 15px;
+            gap: 30px;
+            display: flex;
+            align-items: center;
+            background: rgba(32, 32, 32, 0.5);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border-radius: 35px;
+        }
+
+
+
+        .page-dots-container {
+            position: absolute;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            bottom: 100px;
+            height: 30px;
+            border-radius: 15px;
+            padding-left: 10px;
+            padding-right: 10px;
+            gap: 8px;
+            transition: background-color 0.2s ease;
+            background-color: rgba(0, 0, 0, 0);
+        }
+      /*:active .page-dots-container {
+            background-color: rgba(32, 32, 32, 0.9);
+        }*/
+        .page-dots {
+            display: flex;
+            justify-content: center;
+            position: fixed;
+            bottom: 3%;
+            width: 100%;
+        }
+        .page-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .page-dot-active {
+            background: rgba(255, 255, 255, 0.8);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+
+
+        .instruction {
+            text-align: center;
+            padding: 20px;
+            display: none; /* */
+        }
+        #content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            display: none; /* */
+        }
+    </style>
+</head>
+<body>
+    <div class="phone">
+        <div class="home-screen">
+        <!--<div class="status-bar">
+                <div class="time" id="current-time">12:34</div>
+                    <script>
+                        function updateTime() { // Status bar time
+                            const timeElement = document.getElementById('current-time');
+                            const now = new Date();
+                            let hours = now.getHours();
+                            const minutes = now.getMinutes();
+
+                            // Convert to 12 hour format
+                            hours = hours % 12;
+                            hours = hours ? hours : 12;
+
+                            timeElement.textContent = `${hours}:${minutes.toString().padStart(2, '0')}`;
+                        }
+                    
+                        // Update time on page load then every 1 sec
+                        updateTime();
+                        setInterval(updateTime, 1000);
+                    </script>
+                <div class="icons">
+                    <div class="icon">
+                        <svg viewBox="0 0 1024 1024"><path d="M157.6 880.8H56.4c-1.6 0-3.4 0-5-0.2s-3.2-0.4-5-0.8l-4.8-1.2c-1.6-0.4-3.2-1-4.6-1.6-1.6-0.6-3-1.4-4.4-2.2-1.4-0.8-2.8-1.6-4.2-2.6-1.4-1-2.8-2-4-3-1.2-1-2.6-2.2-3.6-3.4-1.2-1.2-2.2-2.4-3.4-3.6-1-1.2-2-2.6-3-4s-1.8-2.8-2.6-4.2c-0.8-1.4-1.4-3-2.2-4.4-0.6-1.6-1.2-3-1.6-4.6l-1.2-4.8c-0.4-1.6-0.6-3.2-0.8-5-0.2-1.6-0.2-3.4-0.2-5V627.6c0-1.6 0-3.4 0.2-5s0.4-3.2 0.8-5l1.2-4.8c0.4-1.6 1-3.2 1.6-4.6 0.6-1.6 1.4-3 2.2-4.4 0.8-1.4 1.6-2.8 2.6-4.2 1-1.4 2-2.8 3-4 1-1.2 2.2-2.6 3.4-3.6 1.2-1.2 2.4-2.2 3.6-3.4 1.2-1 2.6-2 4-3s2.8-1.8 4.2-2.6c1.4-0.8 3-1.4 4.4-2.2 1.6-0.6 3-1.2 4.6-1.6l4.8-1.2c1.6-0.4 3.2-0.6 5-0.8 1.6-0.2 3.4-0.2 5-0.2h101.2c1.6 0 3.4 0 5 0.2s3.2 0.4 5 0.8l4.8 1.2c1.6 0.4 3.2 1 4.6 1.6 1.6 0.6 3 1.4 4.4 2.2 1.4 0.8 2.8 1.6 4.2 2.6 1.4 1 2.8 2 4 3 1.2 1 2.6 2.2 3.6 3.4 1.2 1.2 2.2 2.4 3.4 3.6 1 1.2 2 2.6 3 4s1.8 2.8 2.6 4.2 1.4 3 2.2 4.4c0.6 1.6 1.2 3 1.6 4.6l1.2 4.8c0.4 1.6 0.6 3.2 0.8 5 0.2 1.6 0.2 3.4 0.2 5V830c0 1.6 0 3.4-0.2 5s-0.4 3.2-0.8 5l-1.2 4.8c-0.4 1.6-1 3.2-1.6 4.6-0.6 1.6-1.4 3-2.2 4.4s-1.6 2.8-2.6 4.2c-1 1.4-2 2.8-3 4-1 1.2-2.2 2.6-3.4 3.6-1.2 1.2-2.4 2.2-3.6 3.4-1.2 1-2.6 2-4 3s-2.8 1.8-4.2 2.6c-1.4 0.8-3 1.4-4.4 2.2-1.6 0.6-3 1.2-4.6 1.6l-4.8 1.2c-1.6 0.4-3.2 0.6-5 0.8-1.6 0.2-3.4 0.4-5 0.4z m270 0h-101.2c-1.6 0-3.4 0-5-0.2s-3.2-0.4-5-0.8l-4.8-1.2c-1.6-0.4-3.2-1-4.6-1.6-1.6-0.6-3-1.4-4.4-2.2-1.4-0.8-2.8-1.6-4.2-2.6-1.4-1-2.8-2-4-3-1.2-1-2.6-2.2-3.6-3.4-1.2-1.2-2.2-2.4-3.4-3.6-1-1.2-2-2.6-3-4s-1.8-2.8-2.6-4.2c-0.8-1.4-1.4-3-2.2-4.4-0.6-1.6-1.2-3-1.6-4.6l-1.2-4.8c-0.4-1.6-0.6-3.2-0.8-5-0.2-1.6-0.2-3.4-0.2-5V492.6c0-1.6 0-3.4 0.2-5s0.4-3.2 0.8-5l1.2-4.8c0.4-1.6 1-3.2 1.6-4.6 0.6-1.6 1.4-3 2.2-4.4 0.8-1.4 1.6-2.8 2.6-4.2 1-1.4 2-2.8 3-4 1-1.2 2.2-2.6 3.4-3.6 1.2-1.2 2.4-2.2 3.6-3.4 1.2-1 2.6-2 4-3s2.8-1.8 4.2-2.6c1.4-0.8 3-1.4 4.4-2.2 1.6-0.6 3-1.2 4.6-1.6l4.8-1.2c1.6-0.4 3.2-0.6 5-0.8 1.6-0.2 3.4-0.2 5-0.2h101.2c1.6 0 3.4 0 5 0.2s3.2 0.4 5 0.8l4.8 1.2c1.6 0.4 3.2 1 4.6 1.6s3 1.4 4.4 2.2c1.4 0.8 2.8 1.6 4.2 2.6 1.4 1 2.8 2 4 3s2.6 2.2 3.6 3.4c1.2 1.2 2.2 2.4 3.4 3.6 1 1.2 2 2.6 3 4s1.8 2.8 2.6 4.2c0.8 1.4 1.4 3 2.2 4.4 0.6 1.6 1.2 3 1.6 4.6l1.2 4.8c0.4 1.6 0.6 3.2 0.8 5 0.2 1.6 0.2 3.4 0.2 5v337.6c0 1.6 0 3.4-0.2 5s-0.4 3.2-0.8 5l-1.2 4.8c-0.4 1.6-1 3.2-1.6 4.6-0.6 1.6-1.4 3-2.2 4.4-0.8 1.4-1.6 2.8-2.6 4.2-1 1.4-2 2.8-3 4-1 1.2-2.2 2.6-3.4 3.6-1.2 1.2-2.4 2.2-3.6 3.4-1.2 1-2.6 2-4 3s-2.8 1.8-4.2 2.6c-1.4 0.8-3 1.4-4.4 2.2s-3 1.2-4.6 1.6l-4.8 1.2c-1.6 0.4-3.2 0.6-5 0.8-1.6 0-3.4 0.2-5 0.2z m270 0h-101.2c-1.6 0-3.4 0-5-0.2s-3.2-0.4-5-0.8l-4.8-1.2c-1.6-0.4-3.2-1-4.6-1.6-1.6-0.6-3-1.4-4.4-2.2-1.4-0.8-2.8-1.6-4.2-2.6-1.4-1-2.8-2-4-3-1.2-1-2.6-2.2-3.6-3.4-1.2-1.2-2.2-2.4-3.4-3.6-1-1.2-2-2.6-3-4s-1.8-2.8-2.6-4.2c-0.8-1.4-1.4-3-2.2-4.4-0.6-1.6-1.2-3-1.6-4.6l-1.2-4.8c-0.4-1.6-0.6-3.2-0.8-5-0.2-1.6-0.2-3.4-0.2-5V357.6c0-1.6 0-3.4 0.2-5s0.4-3.2 0.8-5l1.2-4.8c0.4-1.6 1-3.2 1.6-4.6 0.6-1.6 1.4-3 2.2-4.4 0.8-1.4 1.6-2.8 2.6-4.2 1-1.4 2-2.8 3-4 1-1.2 2.2-2.6 3.4-3.6 1.2-1.2 2.4-2.2 3.6-3.4 1.2-1 2.6-2 4-3s2.8-1.8 4.2-2.6c1.4-0.8 3-1.4 4.4-2.2 1.6-0.6 3-1.2 4.6-1.6l4.8-1.2c1.6-0.4 3.2-0.6 5-0.8 1.6-0.2 3.4-0.2 5-0.2h101.2c1.6 0 3.4 0 5 0.2s3.2 0.4 5 0.8l4.8 1.2c1.6 0.4 3.2 1 4.6 1.6 1.6 0.6 3 1.4 4.4 2.2 1.4 0.8 2.8 1.6 4.2 2.6 1.4 1 2.8 2 4 3 1.2 1 2.6 2.2 3.6 3.4 1.2 1.2 2.2 2.4 3.4 3.6 1 1.2 2 2.6 3 4s1.8 2.8 2.6 4.2c0.8 1.4 1.4 3 2.2 4.4 0.6 1.6 1.2 3 1.6 4.6l1.2 4.8c0.4 1.6 0.6 3.2 0.8 5 0.2 1.6 0.2 3.4 0.2 5V830c0 1.6 0 3.4-0.2 5s-0.4 3.2-0.8 5l-1.2 4.8c-0.4 1.6-1 3.2-1.6 4.6-0.6 1.6-1.4 3-2.2 4.4-0.8 1.4-1.6 2.8-2.6 4.2-1 1.4-2 2.8-3 4-1 1.2-2.2 2.6-3.4 3.6-1.2 1.2-2.4 2.2-3.6 3.4-1.2 1-2.6 2-4 3s-2.8 1.8-4.2 2.6c-1.4 0.8-3 1.4-4.4 2.2-1.6 0.6-3 1.2-4.6 1.6l-4.8 1.2c-1.6 0.4-3.2 0.6-5 0.8-1.6 0.2-3.4 0.4-5 0.4z m270 0h-101.2c-1.6 0-3.4 0-5-0.2s-3.2-0.4-5-0.8l-4.8-1.2c-1.6-0.4-3.2-1-4.6-1.6-1.6-0.6-3-1.4-4.4-2.2-1.4-0.8-2.8-1.6-4.2-2.6-1.4-1-2.8-2-4-3-1.2-1-2.6-2.2-3.6-3.4-1.2-1.2-2.2-2.4-3.4-3.6-1-1.2-2-2.6-3-4s-1.8-2.8-2.6-4.2c-0.8-1.4-1.4-3-2.2-4.4-0.6-1.6-1.2-3-1.6-4.6l-1.2-4.8c-0.4-1.6-0.6-3.2-0.8-5-0.2-1.6-0.2-3.4-0.2-5V188.8c0-1.6 0-3.4 0.2-5s0.4-3.2 0.8-5l1.2-4.8c0.4-1.6 1-3.2 1.6-4.6 0.6-1.6 1.4-3 2.2-4.4 0.8-1.4 1.6-2.8 2.6-4.2s2-2.8 3-4c1-1.2 2.2-2.6 3.4-3.6 1.2-1.2 2.4-2.2 3.6-3.4 1.2-1 2.6-2 4-3s2.8-1.8 4.2-2.6c1.4-0.8 3-1.4 4.4-2.2 1.6-0.6 3-1.2 4.6-1.6l4.8-1.2c1.6-0.4 3.2-0.6 5-0.8 1.6-0.2 3.4-0.2 5-0.2h101.2c1.6 0 3.4 0 5 0.2s3.2 0.4 5 0.8l4.8 1.2c1.6 0.4 3.2 1 4.6 1.6 1.6 0.6 3 1.4 4.4 2.2 1.4 0.8 2.8 1.6 4.2 2.6 1.4 1 2.8 2 4 3 1.2 1 2.6 2.2 3.6 3.4 1.2 1.2 2.2 2.4 3.4 3.6s2 2.6 3 4 1.8 2.8 2.6 4.2 1.4 3 2.2 4.4c0.6 1.6 1.2 3 1.6 4.6l1.2 4.8c0.4 1.6 0.6 3.2 0.8 5 0.2 1.6 0.2 3.4 0.2 5V830c0 1.6 0 3.4-0.2 5s-0.4 3.2-0.8 5l-1.2 4.8c-0.4 1.6-1 3.2-1.6 4.6-0.6 1.6-1.4 3-2.2 4.4-0.8 1.4-1.6 2.8-2.6 4.2-1 1.4-2 2.8-3 4-1 1.2-2.2 2.6-3.4 3.6-1.2 1.2-2.4 2.2-3.6 3.4-1.2 1-2.6 2-4 3s-2.8 1.8-4.2 2.6c-1.4 0.8-3 1.4-4.4 2.2-1.6 0.6-3 1.2-4.6 1.6l-4.8 1.2c-1.6 0.4-3.2 0.6-5 0.8-1.6 0.2-3.4 0.4-5 0.4z"/></svg>
+                    </div>
+                    <div class="icon">
+                        <svg viewBox="0 0 1024 1024"><path d="M512.2 192 512.2 192c-159.8 0-311.4 59.8-427.8 168.2L64 379.2l19.8 19.6 64.6 64 18.6 18.4 19.2-17.6c89-81.8 204.6-127 325.6-127 121 0 236.8 45.2 325.6 127l19.2 17.6 18.6-18.4 64.6-64 19.8-19.6-20.4-19C823.2 251.8 671.4 192 512.2 192z"/><path d="M794.8 512.8c-77.6-70.2-177.8-108.8-282.2-108.8l-0.2 0-0.6 0-17 0-0.2 0.4c-98.4 4-192 42.2-265.2 108.4l-21 19 20.2 20 65.4 64.8 18.2 18 19.2-16.8c50.6-44.4 114.8-69 180.6-69 66.2 0 130.4 24.6 181 69l19.2 16.8 18.2-18 65.4-64.8 20.2-20L794.8 512.8z"/><path d="M512.4 832l19.2-19 105.6-104.4 21.2-21-23.2-19c-30.8-22.8-64.8-40-123-40-58 0-89.8 18.8-123 40l-23 19 21.2 21 105.6 104.4L512.4 832z"/></svg>
+                    </div>
+                    <div class="icon">
+                        <svg viewBox="0 0 1024 1024"><path d="M792 288H128c-52.8 0-96 43.2-96 96v256c0 52.8 43.2 96 96 96h664c52.8 0 96-43.2 96-96V384c0-52.8-43.2-96-96-96z m40 352c0 22-18 40-40 40H128c-22 0-40-18-40-40V384c0-22 18-40 40-40h664c22 0 40 18 40 40v256z m96-230.8v205.6c32 0 64-55.4 64-102.8s-32-102.8-64-102.8z"/><path d="M768 384H152c-13.2 0-24 10.8-24 24v208c0 13.2 10.8 24 24 24h616c13.2 0 24-10.8 24-24V408c0-13.2-10.8-24-24-24z"/></svg>
+                    </div>
+                </div>
+            </div>-->
+
+
+            <div class="pages">
+                    <!-- Apps/pages created from js -->
+            </div>
+
+            <div class="page-dots">
+                <div class="page-dots-container">
+                </div>
+            </div>
+            <div class="dock">
+                <!-- Apps added by user-->
+            </div>
+        </div>
+    </div>
+
+
+    <div id="content"> <!-- show prompt to add to homescreen if not already - mostly copied from my other thing https://github.com/Kn0tzer/Add-to-Homescreen -->
+        <p>Enable JavaScript for this to work</p>
+    </div>
+    <script>
+        const isStandalone = window.navigator.standalone;
+        const phoneElement = document.querySelector(".phone");
+    
+        if (isStandalone) {
+            document.getElementById("content").style.display = "none";
+            document.querySelectorAll(".instruction").forEach(el => el.style.display = "none");
+            if (phoneElement) {
+                phoneElement.style.display = "flex";
+            }
+        } else {
+            // if not added to homescreen then show instructions
+            document.getElementById("content").innerHTML = `
+                <div class="instruction">
+                    <p>Tap the <b>Share</b> <img src="https://img.icons8.com/?size=100&id=97424&format=png&color=EEEEEE" alt="" style="width: 30px; height: 30px;"> icon at the bottom of your screen, then scroll down until you see <b>'Add to Home Screen'</b> and hit add.</p>
+                </div>
+            `;
+        }
+    </script>
+
+
+    <script> // parse ?= stuff at end of url for app icons and names
+// Initialize or load app positions from localStorage
+function initializeAppPositions() {
+  const appPositions = JSON.parse(localStorage.getItem('appPositions')) || {};
+  const appData = JSON.parse(localStorage.getItem('appData')) || {};
+  
+  // Initialize positions for any apps that don't have positions yet
+  Object.keys(appData).forEach(appName => {
+    if (!appPositions[appName]) {
+      appPositions[appName] = findNextAvailablePosition(appPositions);
+    }
+  });
+  
+  localStorage.setItem('appPositions', JSON.stringify(appPositions));
+  return appPositions;
+}
+
+// Find the next available position number
+function findNextAvailablePosition(positions) {
+  const occupiedPositions = new Set(Object.values(positions));
+  let position = 1;
+  
+  while (occupiedPositions.has(position)) {
+    position++;
+  }
+  
+  return position;
+}
+
+// Update a single app's position
+function updateAppPosition(appName, newPosition) {
+  const appPositions = JSON.parse(localStorage.getItem('appPositions')) || {};
+  appPositions[appName] = newPosition;
+  localStorage.setItem('appPositions', JSON.stringify(appPositions));
+}
+
+// Render all apps in their current positions
+function renderApps() {
+  const appData = JSON.parse(localStorage.getItem('appData')) || {};
+  const appPositions = JSON.parse(localStorage.getItem('appPositions')) || {};
+  const pagesContainer = document.querySelector('.home-screen .pages');
+  
+  // Clear existing pages
+  pagesContainer.innerHTML = '';
+  
+  // Sort apps by position number
+  const apps = Object.entries(appData).map(([name, iconUrl]) => ({
+    name,
+    iconUrl,
+    position: appPositions[name] || findNextAvailablePosition(appPositions)
+  }));
+
+  apps.sort((a, b) => a.position - b.position);
+
+  // Create pages and fill them with apps
+  let currentPage = null;
+  let currentPageNum = -1;
+
+  apps.forEach((app, index) => {
+    const pageNum = Math.floor((app.position - 1) / 24);
+    
+    if (pageNum !== currentPageNum) {
+      currentPage = document.createElement('div');
+      currentPage.classList.add('page');
+      pagesContainer.appendChild(currentPage);
+      currentPageNum = pageNum;
+    }
+
+    const appContainer = createAppElement(app.name, app.iconUrl);
+    currentPage.appendChild(appContainer);
+  });
+
+  // Update page dots
+  updatePageDots(document.querySelectorAll('.page').length);
+}
+
+// Create a single app element
+function createAppElement(appName, iconUrl) {
+  const appContainer = document.createElement('div');
+  appContainer.classList.add('app-container');
+  
+  const link = document.createElement('a');
+  const shortcutUrl = `shortcuts://x-callback-url/run-shortcut?name=Spotlight&input=${encodeURIComponent(appName)}`;
+  link.setAttribute('href', shortcutUrl);
+  link.setAttribute('draggable', 'false');
+  link.setAttribute('target', '_self');
+  
+  const img = document.createElement('img');
+  img.setAttribute('draggable', 'false');
+  img.setAttribute('src', iconUrl);
+  
+  const label = document.createElement('div');
+  label.classList.add('label');
+  label.textContent = appName;
+  
+  link.appendChild(img);
+  appContainer.appendChild(link);
+  appContainer.appendChild(label);
+  
+  return appContainer;
+}
+
+// Update the number of page dots
+function updatePageDots(pageCount) {
+  const dotsContainer = document.querySelector('.page-dots-container');
+  dotsContainer.innerHTML = '';
+  
+  for (let i = 0; i < pageCount; i++) {
+    const dot = document.createElement('div');
+    dot.className = i === 0 ? 'page-dot-active' : 'page-dot';
+    dotsContainer.appendChild(dot);
+  }
+}
+
+// Initialize on page load
+const urlParams = new URLSearchParams(window.location.search);
+let appData = JSON.parse(localStorage.getItem('appData')) || {};
+
+if (urlParams.toString()) {
+  // Update appData with new parameters
+  urlParams.forEach((value, key) => {
+    appData[key] = value;
+  });
+  localStorage.setItem('appData', JSON.stringify(appData));
+  
+  // Initialize positions and render
+  initializeAppPositions();
+  renderApps();
+} else if (Object.keys(appData).length > 0) {
+  // Just render existing apps
+  renderApps();
+}
+    </script>
+
+
+    <script> // track mouse/touch movements for page scrolling
+        const slider = document.querySelector('.pages');
+        const pages = document.querySelectorAll('.page');
+        const pageWidth = slider.offsetWidth;
+        let isDown = false;
+        let startX;
+        let startY;
+        let scrollLeft;
+        let lastX;
+        let velocity = 0;
+        let isDraggingDown = false;
+
+        // MOUSE AND TOUCH page scrolling eventListeners
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX;
+            startY = e.pageY;
+            lastX = startX;
+            scrollLeft = slider.scrollLeft;
+            velocity = 0;
+            isDraggingDown = false;
+        });
+
+        slider.addEventListener('mouseleave', () => {
+            if (isDown) handleScrollEnd();
+            isDown = false;
+        });
+
+        slider.addEventListener('mouseup', () => {
+            handleScrollEnd();
+            isDown = false;
+        });
+
+        // TOUCH ONLY scroll end detection for page dots
+        slider.addEventListener('touchend', () => {
+            const currentScroll = slider.scrollLeft;
+            const targetPage = Math.round(currentScroll / pageWidth);
+            updatePageDots(targetPage);
+        });
+
+        // MOUSE ONLY downward drag eventListeners
+        slider.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+
+            const x = e.pageX;
+            const y = e.pageY;
+            const deltaY = y - startY;
+            const deltaX = x - lastX;
+            lastX = x;
+
+            // MOUSE ONLY drag down check
+            if (Math.abs(deltaY) > Math.abs(deltaX) && !isDraggingDown) {
+                isDraggingDown = true;
+            }
+
+            if (isDraggingDown) {
+                const screenHeight = window.innerHeight;
+                const dragPercentage = (deltaY / screenHeight) * 100;
+
+                if (dragPercentage > 15) {
+                    window.location.href = 'shortcuts://run-shortcut?name=Spotlight'; // MOUSE ONLY open url on drag down 15% of screen
+                    isDown = false;
+                    return;
+                }
+            } else {
+                velocity = velocity * 0.8 + deltaX * 0.2;
+                slider.scrollLeft -= deltaX;
+            }
+        });
+
+        // TOUCH ONLY downward drag eventListeners
+        slider.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].pageX;
+            startY = e.touches[0].pageY;
+            isDraggingDown = false;
+        });
+
+        slider.addEventListener('touchmove', (e) => {
+            const y = e.touches[0].pageY;
+            const x = e.touches[0].pageX;
+            const deltaY = y - startY;
+            const deltaX = x - startX;
+
+            // TOUCH ONLY drag down check
+            if (Math.abs(deltaY) > Math.abs(deltaX) && !isDraggingDown) {
+                isDraggingDown = true;
+            }
+
+            if (isDraggingDown) {
+                e.preventDefault();
+                const screenHeight = window.innerHeight;
+                const dragPercentage = (deltaY / screenHeight) * 100;
+
+                if (dragPercentage > 15) {
+                    window.location.href = 'shortcuts://run-shortcut?name=Spotlight'; // TOUCH ONLY open url on drag down 15% of screen
+                    isDraggingDown = false;
+                    return;
+               }
+            }
+        });
+
+        // Update page dots during scroll
+        slider.addEventListener('scroll', () => {
+            const currentScroll = slider.scrollLeft;
+            const currentPage = Math.round(currentScroll / pageWidth);
+            updatePageDots(currentPage);
+        });
+
+        function handleScrollEnd() {
+            const currentScroll = slider.scrollLeft;
+            const targetPage = Math.round(currentScroll / pageWidth); // check closest page
+
+            if (Math.abs(velocity) > 1) {
+                const direction = velocity > 0 ? -1 : 1;
+                const newPage = Math.max(0, Math.min(pages.length - 1, targetPage + direction));
+                scrollToPage(newPage);
+            } else {
+                scrollToPage(targetPage);
+            }
+        }
+
+        function scrollToPage(pageIndex) {
+            slider.scrollTo({
+                left: pageIndex * pageWidth,
+                behavior: 'smooth' // update this later for accurate ios scrolling
+            });
+            updatePageDots(pageIndex);
+        }
+
+        function updatePageDots(pageIndex) {
+            const dots = document.querySelectorAll('.page-dots-container div');
+            dots.forEach((dot, index) => {
+                if (index === pageIndex) {
+                    dot.className = 'page-dot-active';
+                } else {
+                    dot.className = 'page-dot';
+                }
+            });
+        }
+    </script>
+
+
+    <script>
+        // Get the app data from localStorage
+
+    </script>
+</body>
+</html>

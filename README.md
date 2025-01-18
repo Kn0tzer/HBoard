@@ -1,20 +1,7 @@
 # HBoard
 
 A web based iOS jailbreak alternative, providing tweak injection to a recreation of the iOS homescreen in HTML
-
-https://hboard.netlify.app - Will not work on PC or without the (currently unreleased) setup Shortcut
-
-## Already Added:
-
-Last updated Jan/13/2025
-
-Almost complete recreation of the iOS homescreen in HTML with (near) pixel perfect accuracy. (Not including the app library)
-
-Semi-automatic homescreen recreation
-
-Spotlight search workaround
-
-Opening apps
+### Coming soon
 
 ## Definitely Happening:
 

@@ -1,0 +1,82 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #222;
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI"; /*mfw its illegal to use sf pro*/
+            color: white;
+            display: flex;
+            justify-content: center;
+            zoom: 1;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            touch-action: pan-x;
+            overflow-y: hidden;
+        }
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+        .settings-content {
+            background: #222;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 750px;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+        .settings-content h2 {
+            margin-top: 0;
+        }
+        .close-btn {
+            margin-top: 20px;
+            background: #555;
+            color: #EEE;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .input-container {
+            margin: 20px;
+            display: flex;
+            gap: 5px;
+            height: 40px;
+            border-radius: 5px;
+            background-color: #333;
+            width: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-overlay" id="settingsOverlay">
+        <div class="settings-content">
+            <h2>Settings</h2>
+            <p>Placeholder</p>
+            <div class="input-container">
+                <input type="text" id="base64Input" placeholder="Paste base64 here">
+                <button onclick="parseBase64Data()">Load Apps</button>
+            </div>
+            <a class="close-btn" href="index.html">Close</a>
+        </div>
+    </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
